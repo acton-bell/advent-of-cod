@@ -1,0 +1,9 @@
+{
+  "name": "advent-of-cod",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "bun-types": "^0.2.2"
+  }
+}
