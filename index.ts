@@ -1,10 +1,12 @@
 import { readFileSync } from "fs";
 
-() => {
+const LINE_TERMINATOR = "\r\n";
+
+const day1 = () => {
   // Strategy: sort and destructure values.
 
   // Read:
-  const lines = readFileSync("./day1.txt", "utf-8").split("\n");
+  const lines = readFileSync("./day1.txt", "utf-8").split(LINE_TERMINATOR);
 
   // Process:
   const elves = [0];
@@ -29,10 +31,10 @@ import { readFileSync } from "fs";
   console.log(first + second + third);
 };
 
-() => {
+const day2 = () => {
   // Strategy: encode the results in a matrix (actually nested dictionaries) and just index in.
 
-  const lines = readFileSync("./day2.txt", "utf-8").split("\n");
+  const lines = readFileSync("./day2.txt", "utf-8").split(LINE_TERMINATOR);
 
   // ABC XYZ
   // 123 123
@@ -95,3 +97,55 @@ import { readFileSync } from "fs";
       .reduce((a, b) => a + b, 0)
   );
 };
+
+const day3 = () => {
+  const lines = readFileSync("./day3.txt", "utf-8").split(LINE_TERMINATOR);
+  const priority = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  const partOne = lines
+    .map((line) => {
+      const compartmentOne = line.slice(0, line.length / 2);
+      const compartmentTwo = line.slice(line.length / 2);
+
+      for (let i = 0; i < compartmentOne.length; i++) {
+        for (let j = 0; j < compartmentTwo.length; j++) {
+          if (compartmentOne[i] === compartmentTwo[j]) {
+            return priority.indexOf(compartmentOne[i]) + 1;
+          }
+        }
+      }
+    })
+    .reduce((a, b) => a + b, 0);
+
+  console.log(partOne);
+
+  let partTwo = 0;
+
+  const checkRucksacks = (
+    rucksack_i: string,
+    rucksack_j: string,
+    rucksack_k: string
+  ) => {
+    for (let i = 0; i < rucksack_i.length; i++) {
+      const item_i = rucksack_i[i];
+      for (let j = 0; j < rucksack_j.length; j++) {
+        const item_j = rucksack_j[j];
+        if (item_i === item_j) {
+          for (let k = 0; k < rucksack_k.length; k++) {
+            if (item_j === rucksack_k[k]) {
+              return priority.indexOf(item_i) + 1;
+            }
+          }
+        }
+      }
+    }
+  };
+
+  while (lines.length > 2) {
+    partTwo += checkRucksacks(lines.pop(), lines.pop(), lines.pop());
+  }
+
+  console.log(partTwo);
+};
+
+day3();

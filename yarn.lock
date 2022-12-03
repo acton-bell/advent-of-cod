@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@types/node@18.11.10":
-  version "18.11.10"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.10.tgz#4c64759f3c2343b7e6c4b9caf761c7a3a05cee34"
-  integrity sha512-juG3RWMBOqcOuXC643OAdSA525V44cVgGV6dUDuiFtss+8Fk5x1hI93Rsld43VeJVIeqlP9I7Fn9/qaVqoEAuQ==
+bun-types@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/bun-types/-/bun-types-0.2.2.tgz#ee15e6bf66422db3e9c3baee8b8b895400ac1033"
+  integrity sha512-/1IPC/PPWvV39I7uulBcWHL0Xpi1BqvwF34R/2gRwt0/l5MJB1gt15GLwLP33d59EnkOdRYibImuCg0l/9BRng==
