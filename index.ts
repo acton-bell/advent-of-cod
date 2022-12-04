@@ -148,4 +148,30 @@ const day3 = () => {
   console.log(partTwo);
 };
 
-day3();
+const day4 = () => {
+  // 24-91,80-92
+  const lines = readFileSync("./day4.txt", "utf-8").split(LINE_TERMINATOR);
+
+  const parsed = lines.map((line) =>
+    line.split(",").flatMap((range) => range.split("-").map((_) => parseInt(_)))
+  );
+
+  const partOne = parsed.filter(
+    ([range1Min, range1Max, range2Min, range2Max]) =>
+      (range1Min >= range2Min && range1Max <= range2Max) ||
+      (range2Min >= range1Min && range2Max <= range1Max)
+  );
+
+  console.log(partOne.length);
+
+  const partTwo = parsed.filter(
+    ([range1Min, range1Max, range2Min, range2Max]) =>
+      (range1Min >= range2Min && range1Min <= range2Max) ||
+      (range1Min < range2Min && range1Max >= range2Min) ||
+      (range1Max >= range2Min && range1Max <= range2Max)
+  );
+
+  console.log(partTwo.length);
+};
+
+day4();
