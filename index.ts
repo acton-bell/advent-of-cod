@@ -174,4 +174,79 @@ const day4 = () => {
   console.log(partTwo.length);
 };
 
-day4();
+// day4();
+
+const day5 = () => {
+  // Could just encode the input as arrays...
+  const input = `[F]         [L]     [M]            
+[T]     [H] [V] [G] [V]            
+[N]     [T] [D] [R] [N]     [D]    
+[Z]     [B] [C] [P] [B] [R] [Z]    
+[M]     [J] [N] [M] [F] [M] [V] [H]
+[G] [J] [L] [J] [S] [C] [G] [M] [F]
+[H] [W] [V] [P] [W] [H] [H] [N] [N]
+[J] [V] [G] [B] [F] [G] [D] [H] [G]
+ 1   2   3   4   5   6   7   8   9 `;
+
+  // TODO: Is there an easier way to construct the initial state?
+  const [_, ...entryLines] = input.split("\n\n").reverse();
+  const initialState = Array.from(Array(9), () => []);
+  entryLines.forEach((line) => {
+    for (let i = 1; i < line.length; i += 4) {
+      if (line[i] !== " ") {
+        initialState[(i - 1) / 4].push(line[i]);
+      }
+    }
+  });
+
+  // TODO: Is there a nice way to destructure the instruction?
+  const instructions = readFileSync("day5.txt", "utf8")
+    .split(LINE_TERMINATOR)
+    .map((rawInstruction) => {
+      let move = parseInt(
+        rawInstruction.slice(5, rawInstruction.indexOf(" from "))
+      );
+      const from = parseInt(
+        rawInstruction.slice(
+          rawInstruction.indexOf(" from ") + 6,
+          rawInstruction.indexOf(" to ")
+        )
+      );
+      const to = parseInt(
+        rawInstruction.slice(rawInstruction.indexOf(" to ") + 4)
+      );
+
+      return [move, from, to] as [number, number, number];
+    });
+
+  console.log(
+    instructions
+      .reduce((slots, [move, from, to]) => {
+        while (move > 0) {
+          move--;
+          slots[to - 1].push(slots[from - 1].pop());
+        }
+
+        return slots;
+      }, JSON.parse(JSON.stringify(initialState)) as typeof initialState)
+      .map((slot) => slot[slot.length - 1])
+      .join("")
+  );
+
+  console.log(
+    instructions
+      .reduce((slots, [move, from, to]) => {
+        slots[to - 1].splice(
+          slots[to - 1].length,
+          0,
+          ...slots[from - 1].splice(slots[from - 1].length - move)
+        );
+
+        return slots;
+      }, JSON.parse(JSON.stringify(initialState)) as typeof initialState)
+      .map((slot) => slot[slot.length - 1])
+      .join("")
+  );
+};
+
+day5();
