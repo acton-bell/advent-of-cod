@@ -316,17 +316,20 @@ const day7 = () => {
   // The root file system:
   const fileSystem = { "/": { [rolledUpSizeSymbol]: 0 } };
   let locationPointer = fileSystem;
-  let listingState = locationPointer;
   instructions.forEach((instruction) => {
     const instArr = instruction.split(" ");
     switch (instArr[0]) {
       case "$": {
+        const userCommand = instArr[1];
         // We're executing a user command (cd or ls):
-        switch (instArr[1]) {
+        switch (userCommand) {
           case "cd":
-            listingState = locationPointer =
+            const changeToDirectory = instArr[2];
+            locationPointer =
               locationPointer[
-                instArr[2] === ".." ? parentPointerSymbol : instArr[2]
+                changeToDirectory === ".."
+                  ? parentPointerSymbol
+                  : changeToDirectory
               ];
             break;
           case "ls":
@@ -337,19 +340,19 @@ const day7 = () => {
       }
       case "dir":
         // We've discovered a directory, initialise it if it doesn't already exist (I think it's always new, but just in case):
-        if (locationPointer[instArr[1]] === undefined) {
-          listingState = locationPointer[instArr[1]] = {
-            [parentPointerSymbol]: locationPointer,
-            [rolledUpSizeSymbol]: 0,
-          };
-        }
+        const directoryName = instArr[1];
+        locationPointer[directoryName] = {
+          [parentPointerSymbol]: locationPointer,
+          [rolledUpSizeSymbol]: 0,
+        };
+
         break;
       default: {
         // Only other possible instruction SHOULD be a file size listing (we could check this I guess):
         const size = parseInt(instArr[0]);
 
         // Recurse up the directory structure and add the new size:
-        let cur = listingState;
+        let cur = locationPointer;
         while (cur) {
           cur[rolledUpSizeSymbol] += size;
           cur = cur[parentPointerSymbol];
@@ -358,7 +361,7 @@ const day7 = () => {
     }
   });
 
-  console.log(fileSystem);
+  // Part one answer calculation:
 
   // Traverse and record <100000:
   const rollup = (item: any) =>
@@ -368,6 +371,27 @@ const day7 = () => {
       .reduce((a, b) => a + b, 0);
 
   console.log(rollup(fileSystem["/"]));
+
+  // Part two answer calculation:
+  const totalSpace = 70000000;
+  const unusedSpace = totalSpace - fileSystem["/"][rolledUpSizeSymbol];
+  const updateSpaceRequired = 30000000;
+  const needToFreeUpSpace = updateSpaceRequired - unusedSpace;
+  let partTwoAnswer = Infinity;
+  const traverseAndFindAnswer = (item: any) => {
+    if (
+      item[rolledUpSizeSymbol] > needToFreeUpSpace &&
+      item[rolledUpSizeSymbol] < partTwoAnswer
+    ) {
+      partTwoAnswer = item[rolledUpSizeSymbol];
+    }
+
+    Object.values(item).forEach((child) => traverseAndFindAnswer(child));
+  };
+
+  traverseAndFindAnswer(fileSystem["/"]);
+
+  console.log(partTwoAnswer);
 };
 
 day7();
