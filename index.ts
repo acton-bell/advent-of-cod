@@ -253,11 +253,16 @@ const day6 = () => {
   const rawString = readFileSync("./day6.txt", "utf-8");
 
   // This only works for part 1 (?):
+  // IMPORTANT: Aha, this doesn't work for sequences like 'gtbzgtn' (looking for 5), because it resets when hitting the second 'g' and misses the sequence starting at 'b'.
   const impl1 = (input: string, uniqueSequenceLength: number) => {
     const workingSet = new Set();
     for (let i = 0; i < input.length; i++) {
       // The next character:
       const char = input[i];
+
+      if (i === 2122) {
+        console.log(workingSet);
+      }
 
       // We found a duplicate so reset the sequence:
       if (workingSet.has(char)) {
@@ -266,6 +271,10 @@ const day6 = () => {
 
       // Character is now guaranteed to be unique in the set, so add it:
       workingSet.add(char);
+
+      if (i === 2122) {
+        console.log(workingSet);
+      }
 
       // We reached the desired length...
       if (workingSet.size === uniqueSequenceLength) {
@@ -286,12 +295,14 @@ const day6 = () => {
   };
 
   // This is correct:
-  console.log(impl1(rawString, 4));
+  // console.log(impl1(rawString, 4));
   // This is correct:
   console.log(impl2(rawString, 4));
 
   // This is not correct (returns undefined), but why?
-  console.log(impl1(rawString, 14));
+  // console.log(impl1(rawString, 14));
   // This is correct:
   console.log(impl2(rawString, 14));
 };
+
+day6();
