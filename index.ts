@@ -249,4 +249,49 @@ const day5 = () => {
   );
 };
 
-day5();
+const day6 = () => {
+  const rawString = readFileSync("./day6.txt", "utf-8");
+
+  // This only works for part 1 (?):
+  const impl1 = (input: string, uniqueSequenceLength: number) => {
+    const workingSet = new Set();
+    for (let i = 0; i < input.length; i++) {
+      // The next character:
+      const char = input[i];
+
+      // We found a duplicate so reset the sequence:
+      if (workingSet.has(char)) {
+        workingSet.clear();
+      }
+
+      // Character is now guaranteed to be unique in the set, so add it:
+      workingSet.add(char);
+
+      // We reached the desired length...
+      if (workingSet.size === uniqueSequenceLength) {
+        // ...so return the index:
+        return i;
+      }
+    }
+  };
+
+  // This works for both:
+  const impl2 = (input: string, uniqueSequenceLength: number) => {
+    for (let i = uniqueSequenceLength; i < input.length; i++) {
+      const s = new Set(input.split("").slice(i - uniqueSequenceLength, i));
+      if (s.size === uniqueSequenceLength) {
+        return i;
+      }
+    }
+  };
+
+  // This is correct:
+  console.log(impl1(rawString, 4));
+  // This is correct:
+  console.log(impl2(rawString, 4));
+
+  // This is not correct (returns undefined), but why?
+  console.log(impl1(rawString, 14));
+  // This is correct:
+  console.log(impl2(rawString, 14));
+};
