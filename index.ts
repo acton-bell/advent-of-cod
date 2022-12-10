@@ -259,11 +259,6 @@ const day6 = () => {
     for (let i = 0; i < input.length; i++) {
       // The next character:
       const char = input[i];
-
-      if (i === 2122) {
-        console.log(workingSet);
-      }
-
       // We found a duplicate so reset the sequence:
       if (workingSet.has(char)) {
         workingSet.clear();
@@ -271,10 +266,6 @@ const day6 = () => {
 
       // Character is now guaranteed to be unique in the set, so add it:
       workingSet.add(char);
-
-      if (i === 2122) {
-        console.log(workingSet);
-      }
 
       // We reached the desired length...
       if (workingSet.size === uniqueSequenceLength) {
@@ -305,4 +296,78 @@ const day6 = () => {
   console.log(impl2(rawString, 14));
 };
 
-day6();
+const day7 = () => {
+  const instructions = readFileSync("./day7.txt", "utf8").split(
+    LINE_TERMINATOR
+  );
+
+  // console.log(instructions);
+
+  // $ cd /
+  // $ ls
+  // 53302 chvtw.czb
+  // $ cd ..
+  // dir fml
+
+  // Purposes as defined by the Symbol descriptions:
+  const parentPointerSymbol = Symbol("holds reference to the object's parent");
+  const rolledUpSizeSymbol = "folderSize";
+
+  // The root file system:
+  const fileSystem = { "/": { [rolledUpSizeSymbol]: 0 } };
+  let locationPointer = fileSystem;
+  let listingState = locationPointer;
+  instructions.forEach((instruction) => {
+    const instArr = instruction.split(" ");
+    switch (instArr[0]) {
+      case "$": {
+        // We're executing a user command (cd or ls):
+        switch (instArr[1]) {
+          case "cd":
+            listingState = locationPointer =
+              locationPointer[
+                instArr[2] === ".." ? parentPointerSymbol : instArr[2]
+              ];
+            break;
+          case "ls":
+            // Nothing to do here, would be different if implementing as a state machine.
+            break;
+        }
+        break;
+      }
+      case "dir":
+        // We've discovered a directory, initialise it if it doesn't already exist (I think it's always new, but just in case):
+        if (locationPointer[instArr[1]] === undefined) {
+          listingState = locationPointer[instArr[1]] = {
+            [parentPointerSymbol]: locationPointer,
+            [rolledUpSizeSymbol]: 0,
+          };
+        }
+        break;
+      default: {
+        // Only other possible instruction SHOULD be a file size listing (we could check this I guess):
+        const size = parseInt(instArr[0]);
+
+        // Recurse up the directory structure and add the new size:
+        let cur = listingState;
+        while (cur) {
+          cur[rolledUpSizeSymbol] += size;
+          cur = cur[parentPointerSymbol];
+        }
+      }
+    }
+  });
+
+  console.log(fileSystem);
+
+  // Traverse and record <100000:
+  const rollup = (item: any) =>
+    (item[rolledUpSizeSymbol] <= 100000 ? item[rolledUpSizeSymbol] : 0) +
+    Object.values(item)
+      .map((child) => rollup(child))
+      .reduce((a, b) => a + b, 0);
+
+  console.log(rollup(fileSystem["/"]));
+};
+
+day7();
