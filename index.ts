@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 
 const LINE_TERMINATOR = "\r\n";
 
@@ -301,14 +301,6 @@ const day7 = () => {
     LINE_TERMINATOR
   );
 
-  // console.log(instructions);
-
-  // $ cd /
-  // $ ls
-  // 53302 chvtw.czb
-  // $ cd ..
-  // dir fml
-
   // Purposes as defined by the Symbol descriptions:
   const parentPointerSymbol = Symbol("holds reference to the object's parent");
   const rolledUpSizeSymbol = "folderSize";
@@ -394,4 +386,196 @@ const day7 = () => {
   console.log(partTwoAnswer);
 };
 
-day7();
+const day8 = () => {
+  const input = readFileSync("./day8.txt", "utf8")
+    .split(LINE_TERMINATOR)
+    .map((line) => line.split("").map((char) => parseInt(char)));
+
+  // console.log(input);
+
+  // ASSUMPTION: Input is square
+  const processedMap: Record<
+    string,
+    | {
+        visible: 1 | 0;
+        leftComponent: number;
+        rightComponent: number;
+        bottomComponent: number;
+        topComponent: number;
+      }
+    | undefined
+  > = {};
+  const debugMap = Array.from(Array(input.length), () =>
+    Array.from(Array(input.length), () => 0)
+  );
+
+  for (let y = 0; y < input.length; y++) {
+    const row = input[y];
+
+    let heightPositionMap: Record<number, number | undefined> = {};
+    let highestFromTheLeft = -1;
+    for (let x = 0; x < row.length; x++) {
+      const height = row[x];
+      if (processedMap[`${x},${y}`] === undefined) {
+        processedMap[`${x},${y}`] = {
+          visible: 0,
+          bottomComponent: input.length - y - 1,
+          leftComponent: x,
+          rightComponent: input[y].length - x - 1,
+          topComponent: y,
+        };
+      }
+
+      if (height > highestFromTheLeft) {
+        highestFromTheLeft = height;
+        processedMap[`${x},${y}`].visible = 1;
+      }
+
+      for (let i = height; i < 10; i++) {
+        if (
+          heightPositionMap[i] !== undefined &&
+          x - heightPositionMap[i] < processedMap[`${x},${y}`]?.leftComponent
+        ) {
+          processedMap[`${x},${y}`].leftComponent = x - heightPositionMap[i];
+        }
+      }
+
+      heightPositionMap[height] = x;
+    }
+
+    heightPositionMap = {};
+    let highestFromTheRight = -1;
+    for (let x = row.length - 1; x > -1; x--) {
+      const height = row[x];
+
+      if (processedMap[`${x},${y}`] === undefined) {
+        processedMap[`${x},${y}`] = {
+          visible: 0,
+          bottomComponent: input.length - y - 1,
+          leftComponent: x,
+          rightComponent: input[y].length - x - 1,
+          topComponent: y,
+        };
+      }
+
+      if (height > highestFromTheRight) {
+        highestFromTheRight = height;
+        processedMap[`${x},${y}`].visible = 1;
+      }
+
+      for (let i = height; i < 10; i++) {
+        if (
+          heightPositionMap[i] !== undefined &&
+          heightPositionMap[i] - x < processedMap[`${x},${y}`]?.rightComponent
+        ) {
+          processedMap[`${x},${y}`].rightComponent = heightPositionMap[i] - x;
+        }
+      }
+
+      heightPositionMap[height] = x;
+    }
+  }
+
+  for (let x = 0; x < input[0].length; x++) {
+    let heightPositionMap: Record<number, number | undefined> = {};
+    let highestFromTheTop = -1;
+    for (let y = 0; y < input.length; y++) {
+      const height = input[y][x];
+
+      if (processedMap[`${x},${y}`] === undefined) {
+        processedMap[`${x},${y}`] = {
+          visible: 0,
+          bottomComponent: input.length - y - 1,
+          leftComponent: x,
+          rightComponent: input[y].length - x - 1,
+          topComponent: y,
+        };
+      }
+      if (height > highestFromTheTop) {
+        highestFromTheTop = height;
+        processedMap[`${x},${y}`].visible = 1;
+      }
+
+      for (let i = height; i < 10; i++) {
+        if (
+          heightPositionMap[i] !== undefined &&
+          y - heightPositionMap[i] < processedMap[`${x},${y}`]?.topComponent
+        ) {
+          processedMap[`${x},${y}`].topComponent = y - heightPositionMap[i];
+        }
+      }
+
+      heightPositionMap[height] = y;
+    }
+
+    heightPositionMap = {};
+    let highestFromTheBottom = -1;
+    for (let y = input.length - 1; y > -1; y--) {
+      const height = input[y][x];
+
+      if (processedMap[`${x},${y}`] === undefined) {
+        processedMap[`${x},${y}`] = {
+          visible: 0,
+          bottomComponent: input.length - y - 1,
+          leftComponent: x,
+          rightComponent: input[y].length - x - 1,
+          topComponent: y,
+        };
+      }
+      if (height > highestFromTheBottom) {
+        highestFromTheBottom = height;
+        processedMap[`${x},${y}`].visible = 1;
+      }
+
+      for (let i = height; i < 10; i++) {
+        if (
+          heightPositionMap[i] !== undefined &&
+          heightPositionMap[i] - y < processedMap[`${x},${y}`]?.bottomComponent
+        ) {
+          processedMap[`${x},${y}`].bottomComponent = heightPositionMap[i] - y;
+        }
+      }
+
+      heightPositionMap[height] = y;
+    }
+  }
+
+  // console.log(visibleMap);
+  console.log(
+    "Part one",
+    Object.values(processedMap).filter((item) => item?.visible === 1).length
+  );
+  Object.keys(processedMap).forEach((key) => {
+    const [x, y] = key.split(",").map((coord) => parseInt(coord));
+    debugMap[y][x] = processedMap[`${x},${y}`]?.bottomComponent;
+  });
+  // console.log(processedMap);
+  writeFileSync(
+    "./day8Debug.txt",
+    debugMap
+      .map((line) => line.map((char) => (char === -1 ? "X" : char)).join(""))
+      .join(LINE_TERMINATOR),
+    "utf8"
+  );
+
+  writeFileSync(
+    "./day8Part2Debug.json",
+    JSON.stringify(processedMap, null, 2),
+    "utf8"
+  );
+
+  console.log(
+    "Part two:",
+    Object.values(processedMap)
+      .map(
+        (item) =>
+          (item?.bottomComponent ?? 0) *
+          (item?.topComponent ?? 0) *
+          (item?.leftComponent ?? 0) *
+          (item?.rightComponent ?? 0)
+      )
+      .sort((a, b) => b - a)[0]
+  );
+
+  // console.log(Object.values(processedMap));
+};
