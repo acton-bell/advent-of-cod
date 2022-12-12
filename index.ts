@@ -554,7 +554,7 @@ const day8 = () => {
     "./day8Debug.txt",
     debugMap
       .map((line) => line.map((char) => (char === -1 ? "X" : char)).join(""))
-      .join("/n"),
+      .join("\r"),
     "utf8"
   );
 
