@@ -577,3 +577,99 @@ const day8 = () => {
 
   // console.log(Object.values(processedMap));
 }
+
+const day9 = () => {
+  const instructions = readFileSync("./day9.txt", "utf8")
+    .split(LINE_TERMINATOR)
+    .map((line) => {
+      const [direction, amount] = line.split(" ")
+      return [direction, parseInt(amount)] as ["L" | "R" | "U" | "D", number]
+    })
+
+  // Coords are x,y (spatially -ve is left and down, +ve is right and up)
+  const head = { x: 0, y: 0 }
+  const tail = { x: 0, y: 0 }
+
+  /*
+  TTT
+  THT
+  TTT
+  */
+  // Head moves right and T was in left column (t_x == h_x - 1, t_y = h_y) -> T moves to (old) center
+  // Head moves right and T was in center column () -> no change
+  // Head moves right and T was in right column -> no change
+  // And then just mirror this in all four directions.
+
+  const printMap = (
+    h: { x: number; y: number },
+    t: { x: number; y: number },
+    size: number
+  ) => {
+    for (let i = 0; i < size; i++) {
+      let line = ""
+      for (let j = 0; j < size; j++) {
+        line +=
+          j === h.x && size - i - 1 === h.y
+            ? "H"
+            : j === t.x && size - i - 1 === t.y
+            ? "T"
+            : i === size - 1 && j === 0
+            ? "s"
+            : "."
+      }
+      console.log(line)
+    }
+  }
+
+  const visitSet = new Set()
+  for (let i = 0; i < instructions.length; i++) {
+    let [direction, amount] = instructions[i]
+    while (amount--) {
+      switch (direction) {
+        case "L":
+          if (tail.x > head.x) {
+            tail.x--
+            tail.y = head.y
+          }
+          head.x--
+          break
+        case "R":
+          if (tail.x < head.x) {
+            tail.x++
+            tail.y = head.y
+          }
+          head.x++
+          break
+        case "U":
+          if (tail.y < head.y) {
+            tail.y++
+            tail.x = head.x
+          }
+          head.y++
+          break
+        case "D":
+          if (tail.y > head.y) {
+            tail.y--
+            tail.x = head.x
+          }
+          head.y--
+          break
+        default:
+          throw new Error("Unexpected (and unhandled) direction encountered.")
+      }
+
+      // console.log("\n")
+      // printMap(head, tail, 50)
+      // console.log("\n")
+      visitSet.add(`${tail.x},${tail.y}`)
+    }
+  }
+
+  // console.log(instructions)
+  // console.log(head)
+  console.log(visitSet.size)
+
+  // Need a function to take two adjacent knots and update the position of the second
+}
+
+day9()
